@@ -140,13 +140,10 @@ function pushToGHL_(data) {
         firstName: firstName, lastName: lastName,
         name: nombre, email: data.correo, phone: data.whatsapp,
         source: data.fuente || GHL_TAG,
-        tags: [GHL_TAG],
-        customFields: [
-          { key: "cargo", field_value: data.cargo || "" },
-          { key: "intereses", field_value: (data.intereses || []).join(", ") },
-          { key: "premio_ruleta", field_value: data.premio || "" },
-          { key: "codigo_canje", field_value: data.codigo || "" }
-        ]
+        tags: [GHL_TAG]
+        // Nota: si luego creas custom fields en GHL (cargo, intereses, premio,
+        // codigo), se pueden agregar aquí con "customFields". Por ahora van en
+        // el Sheet para no romper el upsert si el campo no existe.
       })
     });
     return;
