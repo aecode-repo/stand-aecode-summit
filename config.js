@@ -9,7 +9,7 @@ window.AECODE_CONFIG = {
   /* --- 1. A dónde se envían los datos del formulario -------------------
      Pega aquí la URL del Apps Script (Implementar → Aplicación web).
      Mientras esté vacía, el sitio funciona en "modo demo" (no guarda). */
-  APPS_SCRIPT_URL: "",
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxIW5FA02hyz474ooYSGsCR3ixGzH9Rdcw6I592sSSqINPVROA4ZIO90m3_DRMppWTpBA/exec",
 
   /* --- 2. Links de redes (los usa la pantalla final y el correo) ------- */
   LINKS: {

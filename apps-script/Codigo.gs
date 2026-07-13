@@ -17,7 +17,12 @@
  * ------------------------------------------------------------------------- */
 
 /* ====== AJUSTES ====== */
-var GHL_WEBHOOK_URL = "";   // Pega aquí el webhook entrante de GHL (opcional). Vacío = no envía.
+// GHL vía API v2 (recomendado). Pega tu Private Integration Token (pit-...).
+var GHL_TOKEN = "";                               // Vacío = no envía a GHL.
+var GHL_LOCATION_ID = "T8ByMoOOq7hWWswablDhF";    // Sub-cuenta de AECODE (confirmar).
+var GHL_TAG = "leads summit presencial";
+// Alternativa: webhook entrante de GHL (si prefieres no usar token).
+var GHL_WEBHOOK_URL = "";
 var NOTIFY_TEAM_EMAIL = ""; // Correo interno para avisos de lead nuevo (opcional).
 
 var TAB_LEADS  = "Leads";
@@ -52,7 +57,7 @@ function doPost(e) {
     try { sendLeadEmail_(data); sent = true; } catch (err) { Logger.log("Email error: " + err); }
     sheet.getRange(rowIndex, 10).setValue(sent ? "Sí" : "Error"); // col "Correo enviado"
 
-    try { if (GHL_WEBHOOK_URL) pushToGHL_(data); } catch (err) { Logger.log("GHL error: " + err); }
+    try { if (GHL_TOKEN || GHL_WEBHOOK_URL) pushToGHL_(data); } catch (err) { Logger.log("GHL error: " + err); }
     try { if (NOTIFY_TEAM_EMAIL) notifyTeam_(data); } catch (err) {}
 
     return json_({ ok: true, codigo: data.codigo });
@@ -119,16 +124,44 @@ function btn_(href, label, color) {
    GHL — webhook entrante (opcional)
    ========================================================================= */
 function pushToGHL_(data) {
+  var nombre = (data.nombre || "").trim();
+  var firstName = nombre.split(" ")[0] || nombre;
+  var lastName = nombre.split(" ").slice(1).join(" ");
+
+  // Opción A: API v2 (crea/actualiza el contacto directo, con etiqueta).
+  if (GHL_TOKEN) {
+    UrlFetchApp.fetch("https://services.leadconnectorhq.com/contacts/upsert", {
+      method: "post",
+      contentType: "application/json",
+      muteHttpExceptions: true,
+      headers: { Authorization: "Bearer " + GHL_TOKEN, Version: "2021-07-28" },
+      payload: JSON.stringify({
+        locationId: GHL_LOCATION_ID,
+        firstName: firstName, lastName: lastName,
+        name: nombre, email: data.correo, phone: data.whatsapp,
+        source: data.fuente || GHL_TAG,
+        tags: [GHL_TAG],
+        customFields: [
+          { key: "cargo", field_value: data.cargo || "" },
+          { key: "intereses", field_value: (data.intereses || []).join(", ") },
+          { key: "premio_ruleta", field_value: data.premio || "" },
+          { key: "codigo_canje", field_value: data.codigo || "" }
+        ]
+      })
+    });
+    return;
+  }
+
+  // Opción B: webhook entrante.
   UrlFetchApp.fetch(GHL_WEBHOOK_URL, {
     method: "post",
     contentType: "application/json",
     muteHttpExceptions: true,
     payload: JSON.stringify({
-      name: data.nombre, phone: data.whatsapp, email: data.correo,
+      name: nombre, phone: data.whatsapp, email: data.correo,
       cargo: data.cargo, intereses: (data.intereses || []).join(", "),
       premio: data.premio, codigo: data.codigo,
-      source: data.fuente || "leads summit presencial",
-      tags: ["leads summit presencial"]
+      source: data.fuente || GHL_TAG, tags: [GHL_TAG]
     })
   });
 }
