@@ -2,3 +2,7 @@ node_modules/
 .DS_Store
 .vercel
 *.log
+
+# Archivo local con el token GHL (NO subir)
+apps-script/Codigo.WITH-SECRETS.gs
+tokens.txt

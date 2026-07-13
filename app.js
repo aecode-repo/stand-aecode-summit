@@ -1,12 +1,14 @@
 /* =========================================================================
-   AECODE Stand · lógica del formulario
+   AECODE Stand · lógica del formulario  (v2)
+   - Intereses editables en tiempo real desde el Google Sheet (con respaldo).
+   - Checkbox custom (con ✓) que sí funciona.
    ========================================================================= */
 (function () {
   "use strict";
   var CFG = window.AECODE_CONFIG || {};
   var $ = function (s, r) { return (r || document).querySelector(s); };
 
-  /* ---------- 1. Poblar el select de cargo ---------- */
+  /* ---------- 1. Select de cargo ---------- */
   var selCargo = $("#sel-cargo");
   (CFG.CARGOS || []).forEach(function (c) {
     var o = document.createElement("option");
@@ -14,31 +16,57 @@
     selCargo.appendChild(o);
   });
 
-  /* ---------- 2. Poblar las casillas de interés ---------- */
+  /* ---------- 2. Intereses: primero del Sheet, si falla -> config.js ---------- */
   var cont = $("#intereses");
-  (CFG.INTERESES || []).forEach(function (g) {
-    var wrap = document.createElement("div");
-    wrap.className = "int-group";
-    if (g.grupo) {
-      var t = document.createElement("div");
-      t.className = "int-group__title";
-      t.textContent = g.grupo;
-      wrap.appendChild(t);
-    }
-    (g.items || []).forEach(function (label) {
-      wrap.appendChild(makeCheck(label));
-    });
-    cont.appendChild(wrap);
-  });
 
-  // Opción "Otro" con texto libre
-  if (CFG.INTERES_OTRO) {
+  fetchOpciones()
+    .then(function (grupos) { buildIntereses(grupos && grupos.length ? grupos : CFG.INTERESES); })
+    .catch(function () { buildIntereses(CFG.INTERESES); });
+
+  function fetchOpciones() {
+    if (!CFG.APPS_SCRIPT_URL) return Promise.reject();
+    return fetch(CFG.APPS_SCRIPT_URL + "?list=opciones")
+      .then(function (r) { return r.json(); })
+      .then(function (j) { return (j && j.grupos) ? j.grupos : null; });
+  }
+
+  function buildIntereses(grupos) {
+    cont.innerHTML = "";
+    (grupos || []).forEach(function (g) {
+      var wrap = document.createElement("div");
+      wrap.className = "int-group";
+      if (g.grupo) {
+        var t = document.createElement("div");
+        t.className = "int-group__title";
+        t.textContent = g.grupo;
+        wrap.appendChild(t);
+      }
+      (g.items || []).forEach(function (label) { wrap.appendChild(makeOpt(label)); });
+      cont.appendChild(wrap);
+    });
+    if (CFG.INTERES_OTRO) appendOtro();
+  }
+
+  function makeOpt(label) {
+    var l = document.createElement("label");
+    l.className = "opt";
+    l.innerHTML =
+      '<input type="checkbox" name="interes">' +
+      '<span class="opt__box" aria-hidden="true"></span>' +
+      '<span class="opt__label"></span>';
+    l.querySelector("input").value = label;
+    l.querySelector(".opt__label").textContent = label;
+    return l;
+  }
+
+  function appendOtro() {
     var otro = document.createElement("label");
-    otro.className = "check check__otro";
+    otro.className = "opt opt--otro";
     otro.innerHTML =
-      '<span style="display:flex;align-items:center;gap:11px">' +
+      '<span class="opt__row">' +
         '<input type="checkbox" name="interes" value="Otro" id="chk-otro">' +
-        '<span>Otro (cuéntanos)</span>' +
+        '<span class="opt__box" aria-hidden="true"></span>' +
+        '<span class="opt__label">Otro (cuéntanos)</span>' +
       '</span>' +
       '<input type="text" id="otro-text" placeholder="¿Qué más te interesa?" hidden>';
     cont.appendChild(otro);
@@ -47,17 +75,6 @@
       otroText.hidden = !chkOtro.checked;
       if (chkOtro.checked) otroText.focus();
     });
-  }
-
-  function makeCheck(label) {
-    var l = document.createElement("label");
-    l.className = "check";
-    var i = document.createElement("input");
-    i.type = "checkbox"; i.name = "interes"; i.value = label;
-    var s = document.createElement("span");
-    s.textContent = label;
-    l.appendChild(i); l.appendChild(s);
-    return l;
   }
 
   /* ---------- 3. Enviar ---------- */
@@ -82,12 +99,8 @@
     btn.classList.add("btn--loading");
     btn.disabled = true;
 
-    send(data).then(function () {
-      showDone(data);
-    }).catch(function () {
-      // Aun si falla la red, no perdemos al usuario: mostramos la pantalla.
-      showDone(data);
-    });
+    send(data).then(function () { showDone(data); })
+              .catch(function () { showDone(data); });
   });
 
   function collect() {
@@ -95,7 +108,6 @@
     var intereses = fd.getAll("interes");
     var otroText = $("#otro-text");
     if (otroText && otroText.value.trim()) {
-      // reemplaza el "Otro" plano por "Otro: <texto>"
       intereses = intereses.filter(function (x) { return x !== "Otro"; });
       intereses.push("Otro: " + otroText.value.trim());
     }
@@ -121,14 +133,12 @@
   }
 
   function genCode() {
-    var n = Math.floor(1000 + Math.random() * 9000);
-    return "AEC-" + n;
+    return "AEC-" + Math.floor(1000 + Math.random() * 9000);
   }
 
   /* ---------- 4. Envío al Apps Script (no-cors) ---------- */
   function send(data) {
     if (!CFG.APPS_SCRIPT_URL) {
-      // Modo demo: sin backend configurado
       console.info("[AECODE] Modo demo — datos NO enviados:", data);
       return Promise.resolve();
     }
@@ -146,11 +156,8 @@
     $("#done-name").textContent = firstName(data.nombre) || "crack";
     $("#claim-code").textContent = data.codigo;
 
-    // Si no ganó nada aún, ocultamos el código
     var noPrize = /a[uú]n no|todav[ií]a|no juego|no gan|nada/i.test(data.premio || "");
-    if (!data.premio || noPrize) {
-      $("#claim-box").hidden = true;
-    }
+    if (!data.premio || noPrize) $("#claim-box").hidden = true;
 
     $("#cta-ig").href = L.instagram || "#";
     $("#cta-wa").href = L.wa_channel || "#";
@@ -165,7 +172,7 @@
 
   function firstName(full) { return (full || "").split(" ")[0]; }
 
-  /* ---------- 6. Redirección al Beacons/IG ---------- */
+  /* ---------- 6. Redirección ---------- */
   function startRedirect(url) {
     var R = CFG.REDIRECT || {};
     if (!R.enabled || !url) return;
@@ -173,8 +180,7 @@
     var left = R.delay_seconds || 6;
     note.hidden = false; count.textContent = left;
     var t = setInterval(function () {
-      left -= 1;
-      count.textContent = left;
+      left -= 1; count.textContent = left;
       if (left <= 0) { clearInterval(t); window.location.href = url; }
     }, 1000);
   }

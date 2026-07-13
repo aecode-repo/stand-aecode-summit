@@ -25,9 +25,11 @@ var GHL_TAG = "leads summit presencial";
 var GHL_WEBHOOK_URL = "";
 var NOTIFY_TEAM_EMAIL = ""; // Correo interno para avisos de lead nuevo (opcional).
 
-var TAB_LEADS  = "Leads";
-var TAB_CONFIG = "Config_Correo";
-var TAB_RULETA = "Inventario_Ruleta";
+var TAB_LEADS    = "Leads";
+var TAB_CONFIG   = "Config_Correo";
+var TAB_RULETA   = "Inventario_Ruleta";
+var TAB_OPCIONES = "Opciones_Form";   // diplomados/intereses editables por ventas
+var OPCIONES_HEADERS = ["Orden", "Grupo", "Item", "Activo"];
 
 var LEAD_HEADERS = [
   "Timestamp","Nombre","WhatsApp","Correo","Cargo/condición","¿Qué ganaste?",
@@ -68,7 +70,29 @@ function doPost(e) {
   }
 }
 
-function doGet() { return json_({ ok: true, service: "AECODE Stand backend" }); }
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  if (p.list === "opciones") return json_({ ok: true, grupos: getOpciones_() });
+  return json_({ ok: true, service: "AECODE Stand backend" });
+}
+
+/** Lee la pestaña Opciones_Form y devuelve [{grupo, items:[...]}] ordenado. */
+function getOpciones_() {
+  var sh = SpreadsheetApp.getActive().getSheetByName(TAB_OPCIONES);
+  if (!sh || sh.getLastRow() < 2) return [];
+  var rows = sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues();
+  rows = rows.filter(function (r) {
+    return r[2] && String(r[3]).toUpperCase() !== "FALSE" && r[3] !== false;
+  });
+  rows.sort(function (a, b) { return (Number(a[0]) || 0) - (Number(b[0]) || 0); });
+  var order = [], map = {};
+  rows.forEach(function (r) {
+    var g = String(r[1] || "").trim() || "Opciones";
+    if (!map[g]) { map[g] = []; order.push(g); }
+    map[g].push(String(r[2]).trim());
+  });
+  return order.map(function (g) { return { grupo: g, items: map[g] }; });
+}
 
 /* =========================================================================
    Correo personalizado
@@ -206,6 +230,31 @@ function setupSheet() {
     ];
     rul.getRange(2, 1, r.length, 6).setValues(r);
   }
+
+  // Opciones del formulario (diplomados/intereses) — EDITABLES por ventas.
+  // Cambia nombres, Orden o pon Activo=FALSE y la landing se actualiza al refrescar.
+  var op = getSheet_(TAB_OPCIONES, OPCIONES_HEADERS);
+  if (op.getLastRow() < 2) {
+    var o = [
+      [1, "Diplomados", "Diplomado de IA aplicada a la Ingeniería y Construcción", true],
+      [2, "Diplomados", "Diplomado BIM en Infraestructura Vial", true],
+      [3, "Diplomados", "Diplomado BIM en Obras con LEAN & BI", true],
+      [4, "Diplomados", "Diplomado BIM aplicado a Proyectos Hospitalarios", true],
+      [5, "Diplomados", "Diplomado BIM aplicado a Colegios / Edificaciones Educativas", true],
+      [6, "Diplomados", "Diplomado de Gestor BIM", true],
+      [7, "Diplomados", "Especialización en Python para automatización (BIM/Revit)", true],
+      [10, "Oportunidades", "Ser colaborador de AECODE más adelante", true],
+      [11, "Oportunidades", "Ser parte de la BECA AI TALENT para estudiantes", true],
+      [12, "Oportunidades", "Tener una alianza con mi empresa", true],
+      [13, "Oportunidades", "Recibir una capacitación corporativa", true],
+      [14, "Oportunidades", "Ser sponsor del próximo Summit", true],
+      [15, "Oportunidades", "Proponer una iniciativa en AECODE próximamente", true],
+      [16, "Oportunidades", "Investigación en AECODE", true],
+      [17, "Oportunidades", "Ser embajador de AECODE", true]
+    ];
+    op.getRange(2, 1, o.length, 4).setValues(o);
+  }
+
   SpreadsheetApp.getActive().toast("Pestañas listas ✅");
 }
 
