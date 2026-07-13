@@ -60,20 +60,29 @@
   }
 
   function appendOtro() {
-    var otro = document.createElement("label");
-    otro.className = "opt opt--otro";
-    otro.innerHTML =
-      '<span class="opt__row">' +
-        '<input type="checkbox" name="interes" value="Otro" id="chk-otro">' +
-        '<span class="opt__box" aria-hidden="true"></span>' +
-        '<span class="opt__label">Otro (cuéntanos)</span>' +
-      '</span>' +
-      '<input type="text" id="otro-text" placeholder="¿Qué más te interesa?" hidden>';
-    cont.appendChild(otro);
-    var chkOtro = $("#chk-otro"), otroText = $("#otro-text");
+    var wrap = document.createElement("div");
+    wrap.className = "otro-wrap";
+
+    var lbl = document.createElement("label");
+    lbl.className = "opt";
+    lbl.innerHTML =
+      '<input type="checkbox" name="interes" value="Otro" id="chk-otro">' +
+      '<span class="opt__box" aria-hidden="true"></span>' +
+      '<span class="opt__label">Otro (cuéntanos)</span>';
+
+    // El input de texto va FUERA del label (si no, tocarlo desmarca la casilla).
+    var txt = document.createElement("input");
+    txt.type = "text"; txt.id = "otro-text"; txt.className = "otro-text";
+    txt.placeholder = "¿Qué más te interesa?"; txt.hidden = true;
+
+    wrap.appendChild(lbl);
+    wrap.appendChild(txt);
+    cont.appendChild(wrap);
+
+    var chkOtro = lbl.querySelector("#chk-otro");
     chkOtro.addEventListener("change", function () {
-      otroText.hidden = !chkOtro.checked;
-      if (chkOtro.checked) otroText.focus();
+      txt.hidden = !chkOtro.checked;
+      if (chkOtro.checked) txt.focus();
     });
   }
 

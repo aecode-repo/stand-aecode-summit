@@ -1,17 +1,10 @@
 <!doctype html>
 <!--
-  ╔══════════════════════════════════════════════════════════════════════╗
-  ║  VISTA PREVIA del correo de bienvenida — AECODE Stand                 ║
-  ║  Ábrelo con doble clic para ver cómo le llega al lead.                ║
-  ║                                                                      ║
-  ║  ⚠️ Esto es solo un EJEMPLO con datos de muestra (Ana, media beca).  ║
-  ║  El correo real lo genera el Apps Script (apps-script/Codigo.gs,     ║
-  ║  función sendLeadEmail_). Los TEXTOS los editas en la pestaña        ║
-  ║  "Config_Correo" del Google Sheet — sin tocar código.               ║
-  ║                                                                      ║
-  ║  Es UN solo correo que se personaliza con: nombre, lo que marcó      ║
-  ║  como interés, su premio y los links.                               ║
-  ╚══════════════════════════════════════════════════════════════════════╝
+  VISTA PREVIA del correo de bienvenida — AECODE Stand (v2, sin emojis).
+  Ábrelo con doble clic para ver cómo le llega al lead.
+  Ejemplo: Ana marcó 1 diplomado (→ descuento + 72h) y 1 oportunidad (→ "nos contactaremos").
+  El correo real lo genera apps-script/Codigo.gs (sendLeadEmail_).
+  Textos editables en la pestaña "Config_Correo" del Sheet (incluye el % de descuento).
 -->
 <html lang="es">
 <head>
@@ -24,49 +17,38 @@
 
 <div style="font-family:Manrope,Arial,sans-serif;max-width:520px;margin:auto;color:#1a1a2e">
 
-  <!-- Cabecera navy con saludo -->
   <div style="background:#191C32;border-radius:16px;padding:26px;text-align:center">
-    <h1 style="color:#fff;font-size:22px;margin:0">¡Bienvenida a AECODE!</h1>
+    <h1 style="color:#fff;font-size:22px;margin:0">Bienvenido a AECODE</h1>
     <p style="color:#9193BB;margin:10px 0 0">
-      Hola <b style="color:#fff">Ana</b>, gracias por pasar por nuestro stand. 🤝
+      Hola <b style="color:#fff">Ana</b>, gracias por pasar por nuestro stand.
     </p>
   </div>
 
-  <!-- Cuerpo -->
   <div style="padding:22px 6px;background:#ffffff;border-radius:0 0 16px 16px">
-    <p style="line-height:1.6;color:#33364d">
-      Aquí está todo lo que tenemos para ti — deslízalo con calma:
-    </p>
+    <p style="line-height:1.6;color:#33364d">Aquí está todo lo que tenemos para ti — deslízalo con calma:</p>
 
-    <!-- Intereses marcados (dinámico) -->
     <p style="margin-top:14px;color:#33364d"><b>Marcaste interés en:</b></p>
     <ul style="margin:8px 0 0;padding-left:18px;color:#33364d;line-height:1.7">
-      <li>Diplomado de IA aplicada a la Ingeniería y Construcción</li>
-      <li>Ser parte de la BECA AI TALENT para estudiantes</li>
+      <li>Diplomado BIM en Infraestructura Vial</li>
+      <li>Ser embajador de AECODE</li>
     </ul>
 
-    <!-- Premio (dinámico; se oculta si no ganó) -->
-    <p style="margin-top:14px;color:#33364d">
-      🎁 <b>Tu premio:</b> Media beca &nbsp;·&nbsp; código <b>AEC-5904</b> (válido 24 h).
-    </p>
-
-    <!-- Botones -->
-    <div style="margin:22px 0;text-align:center">
-      <a href="https://beacons.ai/aecode.ai"
-         style="display:block;margin:8px auto;max-width:320px;background:#7C28F8;color:#fff;
-                text-decoration:none;font-weight:700;padding:13px 18px;border-radius:100px">
-        🔗 Mira todo lo de AECODE</a>
-      <a href="https://www.instagram.com/aecode.ai/"
-         style="display:block;margin:8px auto;max-width:320px;background:#E1306C;color:#fff;
-                text-decoration:none;font-weight:700;padding:13px 18px;border-radius:100px">
-        📸 Síguenos en Instagram</a>
-      <a href="https://wa.me/51900121245"
-         style="display:block;margin:8px auto;max-width:320px;background:#25D366;color:#fff;
-                text-decoration:none;font-weight:700;padding:13px 18px;border-radius:100px">
-        💬 Escríbenos por WhatsApp</a>
+    <!-- Bloque de descuento (si marcó diplomado) -->
+    <div style="margin:20px 0;padding:16px 18px;border-radius:12px;background:#F3EEFF;border:1px solid #E0D4FF">
+      <p style="margin:0;color:#33364d">Por estar en el stand de AECODE <b>te ganaste hasta 40% de descuento</b> en los diplomados que marcaste.</p>
+      <p style="margin:8px 0 0;color:#6b4bd6;font-weight:700">Tienes 72 horas para reclamarlo antes de que alguien más te lo gane.</p>
     </div>
 
-    <p style="color:#6b6e93;font-size:13px">Nos vemos pronto — Equipo AECODE 🚀</p>
+    <!-- Bloque de otras iniciativas -->
+    <p style="margin:16px 0 0;color:#33364d">Sobre <b>Ser embajador de AECODE</b>, nos contactaremos contigo pronto.</p>
+
+    <div style="margin:24px 0;text-align:center">
+      <a href="https://beacons.ai/aecode.ai" style="display:block;margin:8px auto;max-width:320px;background:#7C28F8;color:#fff;text-decoration:none;font-weight:700;padding:13px 18px;border-radius:100px">Mira todo lo de AECODE</a>
+      <a href="https://www.instagram.com/aecode.ai/" style="display:block;margin:8px auto;max-width:320px;background:#E1306C;color:#fff;text-decoration:none;font-weight:700;padding:13px 18px;border-radius:100px">Síguenos en Instagram</a>
+      <a href="https://wa.me/51900121245" style="display:block;margin:8px auto;max-width:320px;background:#25D366;color:#fff;text-decoration:none;font-weight:700;padding:13px 18px;border-radius:100px">Reclama tu premio aquí</a>
+    </div>
+
+    <p style="color:#6b6e93;font-size:13px">Nos vemos pronto — Equipo AECODE</p>
   </div>
 </div>
 

@@ -102,32 +102,57 @@ function sendLeadEmail_(data) {
   var nombre = (data.nombre || "").split(" ")[0] || "hola";
   var intereses = data.intereses || [];
 
-  var asunto = (cfg.asunto || "¡Gracias por visitarnos en el AI Construction Summit! 👷")
+  // Clasificar lo que marcó: diplomados vs. otras iniciativas.
+  var diplomaSet = getDiplomaSet_();
+  var diplomas = intereses.filter(function (i) { return diplomaSet[i]; });
+  var otros    = intereses.filter(function (i) { return !diplomaSet[i]; });
+
+  var asunto = (cfg.asunto || "Gracias por visitarnos en el AI Construction Summit")
                  .replace("{nombre}", nombre);
+  var descuento = cfg.descuento || "un descuento especial";
 
   var listaIntereses = intereses.length
-    ? "<ul style='margin:8px 0 0;padding-left:18px'>" +
+    ? "<ul style='margin:8px 0 0;padding-left:18px;color:#33364d;line-height:1.7'>" +
         intereses.map(function (i) { return "<li>" + esc_(i) + "</li>"; }).join("") + "</ul>"
     : "";
+
+  // Bloque de descuento (solo si marcó al menos un diplomado).
+  var bloqueDiploma = diplomas.length ? (
+    "<div style='margin:20px 0;padding:16px 18px;border-radius:12px;background:#F3EEFF;border:1px solid #E0D4FF'>" +
+      "<p style='margin:0;color:#33364d'>Por estar en el stand de AECODE <b>te ganaste " +
+        esc_(descuento) + " de descuento</b> en los diplomados que marcaste.</p>" +
+      "<p style='margin:8px 0 0;color:#6b4bd6;font-weight:700'>Tienes 72 horas para reclamarlo " +
+        "antes de que alguien más te lo gane.</p>" +
+    "</div>"
+  ) : "";
+
+  // Bloque para otras iniciativas (colaborador, beca, alianza, etc.).
+  var bloqueOtros = otros.length ? (
+    "<p style='margin:16px 0 0;color:#33364d'>Sobre <b>" + esc_(listInline_(otros)) +
+      "</b>, nos contactaremos contigo pronto.</p>"
+  ) : "";
+
+  // El botón de WhatsApp cambia según haya premio.
+  var waLabel = diplomas.length ? "Reclama tu premio aquí" : "Escríbenos por WhatsApp";
 
   var body = [
     "<div style='font-family:Manrope,Arial,sans-serif;max-width:520px;margin:auto;color:#1a1a2e'>",
     "<div style='background:#191C32;border-radius:16px;padding:26px;text-align:center'>",
-      "<h1 style='color:#fff;font-size:22px;margin:0'>", esc_(cfg.saludo || "¡Bienvenido/a a AECODE!"), "</h1>",
+      "<h1 style='color:#fff;font-size:22px;margin:0'>", esc_(cfg.saludo || "Bienvenido a AECODE"), "</h1>",
       "<p style='color:#9193BB;margin:10px 0 0'>Hola <b style='color:#fff'>", esc_(nombre),
-        "</b>, gracias por pasar por nuestro stand. 🤝</p>",
+        "</b>, gracias por pasar por nuestro stand.</p>",
     "</div>",
     "<div style='padding:22px 6px'>",
-      "<p>", esc_(cfg.intro || "Aquí está todo lo que tenemos para ti — deslízalo con calma:"), "</p>",
-      intereses.length ? "<p style='margin-top:14px'><b>Marcaste interés en:</b>" + listaIntereses + "</p>" : "",
-      data.premio ? "<p style='margin-top:14px'>🎁 <b>Tu premio:</b> " + esc_(data.premio) +
-        " &nbsp;·&nbsp; código <b>" + esc_(data.codigo || "") + "</b> (válido 24 h).</p>" : "",
-      "<div style='margin:22px 0;text-align:center'>",
-        btn_(cfg.link_beacons, "🔗 Mira todo lo de AECODE", "#7C28F8"),
-        btn_(cfg.link_ig, "📸 Síguenos en Instagram", "#E1306C"),
-        btn_(cfg.link_wa, "💬 Escríbenos por WhatsApp", "#25D366"),
+      "<p style='color:#33364d'>", esc_(cfg.intro || "Aquí está todo lo que tenemos para ti — deslízalo con calma:"), "</p>",
+      intereses.length ? "<p style='margin-top:14px;color:#33364d'><b>Marcaste interés en:</b></p>" + listaIntereses : "",
+      bloqueDiploma,
+      bloqueOtros,
+      "<div style='margin:24px 0;text-align:center'>",
+        btn_(cfg.link_beacons, "Mira todo lo de AECODE", "#7C28F8"),
+        btn_(cfg.link_ig, "Síguenos en Instagram", "#E1306C"),
+        btn_(cfg.link_wa, waLabel, "#25D366"),
       "</div>",
-      "<p style='color:#6b6e93;font-size:13px'>", esc_(cfg.firma || "Nos vemos pronto — Equipo AECODE 🚀"), "</p>",
+      "<p style='color:#6b6e93;font-size:13px'>", esc_(cfg.firma || "Nos vemos pronto — Equipo AECODE"), "</p>",
     "</div></div>"
   ].join("");
 
@@ -135,6 +160,24 @@ function sendLeadEmail_(data) {
     htmlBody: body,
     name: "AECODE"
   });
+}
+
+/** Devuelve un mapa {nombreDiplomado: true} desde la pestaña Opciones_Form. */
+function getDiplomaSet_() {
+  var out = {};
+  var sh = SpreadsheetApp.getActive().getSheetByName(TAB_OPCIONES);
+  if (!sh || sh.getLastRow() < 2) return out;
+  sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().forEach(function (r) {
+    if (r[2] && String(r[1]).trim().toLowerCase() === "diplomados") out[String(r[2]).trim()] = true;
+  });
+  return out;
+}
+
+/** "a, b y c" para listar en el correo. */
+function listInline_(arr) {
+  if (!arr || !arr.length) return "";
+  if (arr.length === 1) return arr[0];
+  return arr.slice(0, -1).join(", ") + " y " + arr[arr.length - 1];
 }
 
 function btn_(href, label, color) {
@@ -200,20 +243,18 @@ function notifyTeam_(data) {
 function setupSheet() {
   getSheet_(TAB_LEADS, LEAD_HEADERS);
 
-  // Config del correo (editable a mano después)
+  // Config del correo (editable a mano después). Agrega solo las claves que falten.
   var cfg = getSheet_(TAB_CONFIG, ["Clave", "Valor"]);
-  if (cfg.getLastRow() < 2) {
-    var rows = [
-      ["asunto", "¡Gracias por visitarnos en el AI Construction Summit! 👷"],
-      ["saludo", "¡Bienvenido/a a AECODE!"],
-      ["intro", "Aquí está todo lo que tenemos para ti — deslízalo con calma:"],
-      ["link_beacons", "https://beacons.ai/aecode.ai"],
-      ["link_ig", "https://www.instagram.com/aecode.ai/"],
-      ["link_wa", "https://wa.me/51900121245"],
-      ["firma", "Nos vemos pronto — Equipo AECODE 🚀"]
-    ];
-    cfg.getRange(2, 1, rows.length, 2).setValues(rows);
-  }
+  upsertKeys_(cfg, [
+    ["asunto", "Gracias por visitarnos en el AI Construction Summit"],
+    ["saludo", "Bienvenido a AECODE"],
+    ["intro", "Aquí está todo lo que tenemos para ti — deslízalo con calma:"],
+    ["descuento", "hasta 40%"],   // <- EDITA aquí el descuento de los diplomados
+    ["link_beacons", "https://beacons.ai/aecode.ai"],
+    ["link_ig", "https://www.instagram.com/aecode.ai/"],
+    ["link_wa", "https://wa.me/51900121245"],
+    ["firma", "Nos vemos pronto — Equipo AECODE"]
+  ]);
 
   // Inventario de la ruleta (llena stock a tu gusto)
   var rul = getSheet_(TAB_RULETA, ["Casilla", "Premio", "Nivel", "Acción exigida", "Stock inicial", "Stock restante"]);
@@ -280,6 +321,18 @@ function getConfig_() {
     if (r[0]) out[String(r[0]).trim()] = r[1];
   });
   return out;
+}
+
+/** Agrega a la hoja (Clave|Valor) solo los pares cuya clave aún no exista. */
+function upsertKeys_(sh, pairs) {
+  var have = {};
+  if (sh.getLastRow() >= 2) {
+    sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues().forEach(function (r) {
+      if (r[0]) have[String(r[0]).trim()] = true;
+    });
+  }
+  var toAdd = pairs.filter(function (p) { return !have[p[0]]; });
+  if (toAdd.length) sh.getRange(sh.getLastRow() + 1, 1, toAdd.length, 2).setValues(toAdd);
 }
 
 function json_(obj) {
