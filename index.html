@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AECODE · AI Construction Summit 2026</title>
+  <meta name="description" content="Participa en el stand de AECODE — gira la ruleta, gana premios y sé parte de la ingeniería moderna." />
+  <meta name="theme-color" content="#191C32" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237C28F8'/%3E%3Cstop offset='0.55' stop-color='%23236BF9'/%3E%3Cstop offset='1' stop-color='%236DEFFD'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%23191C32'/%3E%3Ccircle cx='16' cy='16' r='8' fill='url(%23g)'/%3E%3C/svg%3E" />
+
+  <!-- Tipografía real de la marca: Manrope + Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Luces de fondo (glow morado-cyan) -->
+  <div class="bg-glow" aria-hidden="true">
+    <span class="glow glow--purple"></span>
+    <span class="glow glow--cyan"></span>
+  </div>
+
+  <main class="wrap">
+
+    <!-- ================= VISTA 1 · REGISTRO ================= -->
+    <section id="view-form" class="view">
+
+      <header class="hero">
+        <div class="hero__logos">
+          <img class="logo-summit" src="assets/logo-summit.avif" alt="AI Construction Summit 2026" />
+        </div>
+
+        <div class="hero__aecodito">
+          <img src="assets/aecodito.png" alt="Aecodito, la mascota de AECODE"
+               onerror="this.style.display='none'" />
+        </div>
+
+        <h1 class="hero__title">¡Bienvenido/a a <span class="grad">AECODE</span>! 👋</h1>
+        <p class="hero__lead">
+          Estás en la feria, ya conociste al <b>Aecodito</b>… y ahora llegó
+          <b>tu momento de participar.</b>
+        </p>
+        <p class="hero__sub">
+          Aquí todos somos ingenieros modernos: conversamos, jugamos y aprendemos 🤝
+          Déjanos tus datos, gira la ruleta y llévate algo — a cambio, síguenos y comparte la experiencia.
+        </p>
+
+        <!-- Los 3 pasos de la ruleta -->
+        <ol class="steps" aria-label="Cómo participar en la ruleta">
+          <li><span class="steps__n">1</span> Gira 🎡</li>
+          <li><span class="steps__n">2</span> Envía este form 📲</li>
+          <li><span class="steps__n">3</span> Reclama tu premio 🎁</li>
+        </ol>
+      </header>
+
+      <form id="lead-form" class="card form" novalidate>
+        <p class="form__hint">Te toma 30 segundos. <b>Diviértete y sé parte 👇</b></p>
+
+        <label class="field">
+          <span class="field__label">Nombre completo</span>
+          <input type="text" name="nombre" autocomplete="name" required placeholder="Tu nombre" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">WhatsApp</span>
+          <input type="tel" name="whatsapp" inputmode="tel" autocomplete="tel"
+                 required placeholder="+51 900 000 000" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">Correo</span>
+          <input type="email" name="correo" inputmode="email" autocomplete="email"
+                 required placeholder="tucorreo@ejemplo.com" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">¿Cuál es tu cargo o condición?</span>
+          <div class="select-wrap">
+            <select name="cargo" required id="sel-cargo">
+              <option value="" disabled selected>Elige una opción…</option>
+            </select>
+          </div>
+        </label>
+
+        <label class="field">
+          <span class="field__label">¿Qué ganaste? <em class="opt">(opcional)</em></span>
+          <input type="text" name="premio" placeholder="Ej. Media beca · 20% OFF · aún no juego…" />
+          <span class="field__help">Escríbelo con tus palabras — o déjalo en blanco si aún no giras.</span>
+        </label>
+
+        <fieldset class="field field--group">
+          <legend class="field__label">¿Qué te interesa de AECODE? <em class="opt">(marca al menos 1)</em></legend>
+          <div id="intereses"></div>
+        </fieldset>
+
+        <p id="form-error" class="form__error" role="alert" hidden></p>
+
+        <button type="submit" class="btn btn--primary btn--block" id="btn-submit">
+          <span class="btn__label">Enviar y participar 🎡</span>
+        </button>
+
+        <p class="form__legal">Al enviar, aceptas que AECODE te contacte sobre sus programas.</p>
+      </form>
+    </section>
+
+    <!-- ================= VISTA 2 · ¡LISTO! ================= -->
+    <section id="view-done" class="view" hidden>
+      <div class="card done">
+        <div class="done__check">✓</div>
+        <h2 class="done__title">¡Listo, <span id="done-name">crack</span>! 🎉</h2>
+        <p class="done__lead">Ya estás dentro. Ahora lo mejor:</p>
+
+        <div class="claim" id="claim-box">
+          <span class="claim__label">Tu código de premio</span>
+          <span class="claim__code" id="claim-code">AEC-0000</span>
+          <span class="claim__note">Enséñalo en el stand. Los premios digitales valen 24 h.</span>
+        </div>
+
+        <p class="done__cta-title">Para completar tu participación 👇</p>
+        <div class="cta-stack">
+          <a id="cta-ig" class="btn btn--ig btn--block" href="#" target="_blank" rel="noopener">
+            📸 Síguenos en Instagram <em>(obligatorio)</em>
+          </a>
+          <a id="cta-wa" class="btn btn--wa btn--block" href="#" target="_blank" rel="noopener">
+            💬 Únete a nuestro canal de WhatsApp
+          </a>
+          <a id="cta-beacons" class="btn btn--ghost btn--block" href="#" target="_blank" rel="noopener">
+            🔗 Mira todo lo de AECODE
+          </a>
+        </div>
+
+        <p class="done__redirect" id="redirect-note" hidden>
+          Te llevamos a nuestro perfil en <b><span id="redirect-count">6</span></b>…
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <img class="foot__logo" src="assets/aecode-logo-blanco.png" alt="AECODE" />
+    <span>Ingeniería moderna · te la contamos nosotros 😉</span>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
