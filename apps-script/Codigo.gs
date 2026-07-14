@@ -30,6 +30,8 @@ var TAB_CONFIG   = "Config_Correo";
 var TAB_RULETA   = "Inventario_Ruleta";
 var TAB_OPCIONES = "Opciones_Form";   // diplomados/intereses editables por ventas
 var OPCIONES_HEADERS = ["Orden", "Grupo", "Item", "Activo"];
+var TAB_SUSCRIP  = "Suscripciones";   // leads de la landing HUB (aecode-hub)
+var SUSCRIP_HEADERS = ["Timestamp", "Nombre", "Correo", "WhatsApp", "Perfil", "Intereses", "Fuente"];
 
 var LEAD_HEADERS = [
   "Timestamp","Nombre","WhatsApp","Correo","Cargo/condición","¿Qué ganaste?",
@@ -44,6 +46,10 @@ function doPost(e) {
   lock.waitLock(20000);
   try {
     var data = JSON.parse(e.postData.contents);
+
+    // Formulario de la landing HUB (aecode-hub) -> flujo aparte.
+    if (data.tipo === "hub") return handleHub_(data);
+
     var sheet = getSheet_(TAB_LEADS, LEAD_HEADERS);
 
     var intereses = (data.intereses || []).join(" · ");
@@ -92,6 +98,51 @@ function getOpciones_() {
     map[g].push(String(r[2]).trim());
   });
   return order.map(function (g) { return { grupo: g, items: map[g] }; });
+}
+
+/* =========================================================================
+   HUB (landing aecode-hub) — suscripción de interés
+   ========================================================================= */
+function handleHub_(data) {
+  var sh = getSheet_(TAB_SUSCRIP, SUSCRIP_HEADERS);
+  sh.appendRow([
+    new Date(), data.nombre || "", data.correo || "", data.whatsapp || "",
+    data.cargo || "", (data.intereses || []).join(" · "), data.fuente || "landing hub"
+  ]);
+  data.tag = "landing hub";
+  try { sendHubEmail_(data); } catch (err) { Logger.log("Hub email: " + err); }
+  try { if (GHL_TOKEN || GHL_WEBHOOK_URL) pushToGHL_(data); } catch (err) { Logger.log("Hub GHL: " + err); }
+  return json_({ ok: true });
+}
+
+function sendHubEmail_(data) {
+  var cfg = getConfig_();
+  var nombre = (data.nombre || "").split(" ")[0] || "hola";
+  var intereses = data.intereses || [];
+  var lista = intereses.length
+    ? "<ul style='margin:8px 0 0;padding-left:18px;color:#33364d;line-height:1.7'>" +
+        intereses.map(function (i) { return "<li>" + esc_(i) + "</li>"; }).join("") + "</ul>"
+    : "";
+  var body = [
+    "<div style='font-family:Manrope,Arial,sans-serif;max-width:520px;margin:auto;color:#1a1a2e'>",
+    "<div style='background:#191C32;border-radius:16px;padding:26px;text-align:center'>",
+      "<h1 style='color:#fff;font-size:22px;margin:0'>Gracias por tu interés en AECODE</h1>",
+      "<p style='color:#9193BB;margin:10px 0 0'>Hola <b style='color:#fff'>", esc_(nombre), "</b>,</p>",
+    "</div>",
+    "<div style='padding:22px 6px'>",
+      intereses.length ? "<p style='color:#33364d'>Nos contaste que te interesa:</p>" + lista : "",
+      "<p style='margin-top:14px;color:#33364d'>Nuestro equipo te contactará pronto con toda la información.</p>",
+      "<div style='margin:24px 0;text-align:center'>",
+        btn_(cfg.link_beacons || "https://aecode.ai", "Conoce todo AECODE", "#7C28F8"),
+        btn_(cfg.link_ig, "Síguenos en Instagram", "#E1306C"),
+        btn_(cfg.link_wa, "Escríbenos por WhatsApp", "#25D366"),
+      "</div>",
+      "<p style='color:#6b6e93;font-size:13px'>", esc_(cfg.firma || "Nos vemos pronto — Equipo AECODE"), "</p>",
+    "</div></div>"
+  ].join("");
+  GmailApp.sendEmail(data.correo, "Gracias por tu interés en AECODE", "Abre este correo en HTML.", {
+    htmlBody: body, name: "AECODE"
+  });
 }
 
 /* =========================================================================
@@ -207,7 +258,7 @@ function pushToGHL_(data) {
         firstName: firstName, lastName: lastName,
         name: nombre, email: data.correo, phone: data.whatsapp,
         source: data.fuente || GHL_TAG,
-        tags: [GHL_TAG]
+        tags: [data.tag || GHL_TAG]
         // Nota: si luego creas custom fields en GHL (cargo, intereses, premio,
         // codigo), se pueden agregar aquí con "customFields". Por ahora van en
         // el Sheet para no romper el upsert si el campo no existe.
@@ -225,7 +276,7 @@ function pushToGHL_(data) {
       name: nombre, phone: data.whatsapp, email: data.correo,
       cargo: data.cargo, intereses: (data.intereses || []).join(", "),
       premio: data.premio, codigo: data.codigo,
-      source: data.fuente || GHL_TAG, tags: [GHL_TAG]
+      source: data.fuente || GHL_TAG, tags: [data.tag || GHL_TAG]
     })
   });
 }
