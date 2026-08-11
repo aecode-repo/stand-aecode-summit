@@ -2,7 +2,20 @@
 
 Landing estática mobile-first para capturar leads en el stand. El visitante escanea un QR,
 se registra, y es derivado al Beacons (Instagram + canal de WhatsApp). Los datos van a un
-Google Sheet y disparan un correo personalizado.
+Google Sheet.
+
+## 🔴 Flujo v4 — el correo lo dispara el VENDEDOR (no el propio usuario)
+
+1. La persona se registra y **gira la ruleta física**. Se guarda como `PENDIENTE`.
+   **Todavía NO recibe correo.**
+2. Los vendedores entran al **panel** (`/panel/`) con una contraseña, desde su celular.
+   Ven, en tiempo real (refresco cada 5 s), todos los registros en espera.
+3. El vendedor abre el registro de esa persona y **marca el premio que ganó en la ruleta**
+   (opciones editables). Mientras lo tiene abierto, a los demás vendedores les sale
+   “🔒 lo está atendiendo X” y el servidor impide que dos asignen el mismo.
+4. **Al confirmar**, recién ahí se envía el correo (ya con el premio) y el lead queda cerrado.
+
+Así el usuario nunca se auto-asigna el premio, y no puede repetir con otro correo.
 
 ## Estructura
 
@@ -12,13 +25,25 @@ stand-aecode-summit/
 ├── styles.css          ← diseño (paleta y tipografía reales de AECODE)
 ├── app.js              ← lógica del formulario
 ├── config.js           ← ⚙️ EDITA AQUÍ links, intereses, redirección
+├── panel/              ← 🆕 PANEL de vendedores (protegido con contraseña)
+│   ├── index.html
+│   ├── panel.css
+│   └── panel.js        ← la URL del Apps Script está aquí arriba (const API)
 ├── assets/
-│   ├── aecodito.png    ← ⬅️ GUARDA AQUÍ la imagen del Aecodito (ver abajo)
 │   ├── logo-summit.avif
 │   └── aecode-logo-blanco.png
 └── apps-script/
-    └── Codigo.gs       ← backend (Google Apps Script)
+    ├── Codigo.gs             ← backend público (SIN secretos)
+    └── Codigo.WITH-SECRETS.gs ← el que se pega en Apps Script (token GHL + PANEL_KEY)
 ```
+
+## El panel de vendedores
+
+- URL: `https://stand-aecode-summit.vercel.app/panel/`
+- Entran con **su nombre** + la **contraseña** (`PANEL_KEY`, definida en el Apps Script).
+- Varios pueden entrar a la vez, cada uno en su celular — todos ven la misma cola.
+- Premios editables en la pestaña **`Premios_Panel`** del Sheet (columna `Tipo`: `premio` o `sin`).
+- **Cambia la contraseña** en `Codigo.WITH-SECRETS.gs` → `var PANEL_KEY = "..."` antes de desplegar.
 
 ## ⬅️ Paso pendiente: la imagen del Aecodito
 
@@ -64,4 +89,6 @@ Luego generas un **QR** apuntando a esa URL y lo imprimes para el stand.
 
 - **Links, intereses, segundos de redirección, cargos** → `config.js`
 - **Textos del correo** → pestaña `Config_Correo` del Sheet
-- **Premios y stock de la ruleta** → pestaña `Inventario_Ruleta` del Sheet
+- **Premios que marca el vendedor en el panel** → pestaña `Premios_Panel` del Sheet
+- **Premios y stock físico de la ruleta** → pestaña `Inventario_Ruleta` del Sheet
+- **Contraseña del panel** → `PANEL_KEY` en `Codigo.WITH-SECRETS.gs` (requiere redeploy)
