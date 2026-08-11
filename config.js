@@ -1,5 +1,5 @@
 /* =========================================================================
-   CONFIG — AECODE Stand · AI Construction Summit 2026
+   CONFIG — AECODE Stand · CONEIC
    Edita SOLO este archivo para cambiar links, textos y opciones.
    No necesitas tocar el resto del código.
    ========================================================================= */
@@ -11,30 +11,35 @@ window.AECODE_CONFIG = {
      Mientras esté vacía, el sitio funciona en "modo demo" (no guarda). */
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxIW5FA02hyz474ooYSGsCR3ixGzH9Rdcw6I592sSSqINPVROA4ZIO90m3_DRMppWTpBA/exec",
 
-  /* --- 2. Links de redes (los usa la pantalla final y el correo) ------- */
+  /* --- 2. Links de redes (los usa la pantalla final y el correo) -------
+     wa_channel = página de unión al grupo de WhatsApp del CONEIC. */
   LINKS: {
     beacons:     "https://beacons.ai/aecode.ai",
     instagram:   "https://www.instagram.com/aecode.ai/",
-    wa_channel:  "https://whatsapp.com/channel/0029Vau1xW19mrGTLp43sU3o",
+    wa_channel:  "https://aecode-wsp-main.vercel.app/becatalent",
     wa_direct:   "https://wa.me/51900121245",
+    luma:        "https://luma.com/aecode.ai",
     linkedin:    "https://www.linkedin.com/company/aecode-ai",
     tiktok:      "https://www.tiktok.com/@aecode.ai",
     youtube:     "https://www.youtube.com/@aecode_ai",
     facebook:    "https://www.facebook.com/aecodeai/"
   },
 
-  /* --- 3. Redirección automática al Beacons tras enviar ---------------- */
+  /* --- 3. Redirección automática al grupo de WhatsApp tras enviar ------
+     Se redirige apenas termina el primer segundo, sin espera larga. */
   REDIRECT: {
-    enabled: true,          // true = redirige solo al Beacons
-    delay_seconds: 6        // segundos que ve la pantalla de "¡Listo!" antes de redirigir
+    enabled: true,          // true = redirige solo al grupo de WhatsApp
+    delay_seconds: 1        // segundos que ve la pantalla de "¡Listo!" antes de redirigir
   },
 
   /* --- 4. Cargo o condición (select del formulario) ------------------- */
   CARGOS: [
+    "Parte de un sponsor",
     "Estudiante",
-    "Docente",
-    "Ingeniero(a)",
-    "Emprendedor(a)",
+    "Arquitecto(a)",
+    "Profesional de otra ingeniería",
+    "Gerente de una empresa",
+    "Investigador(a) / Académico(a)",
     "Otro"
   ],
 

@@ -125,9 +125,8 @@
       whatsapp: (fd.get("whatsapp") || "").trim(),
       correo:   (fd.get("correo") || "").trim(),
       cargo:    (fd.get("cargo") || "").trim(),
-      premio:   (fd.get("premio") || "").trim(),
       intereses: intereses,
-      fuente: "leads summit presencial",
+      fuente: "leads coneic presencial",
       user_agent: navigator.userAgent
     };
   }
@@ -165,9 +164,6 @@
     $("#done-name").textContent = firstName(data.nombre) || "crack";
     $("#claim-code").textContent = data.codigo;
 
-    var noPrize = /a[uú]n no|todav[ií]a|no juego|no gan|nada/i.test(data.premio || "");
-    if (!data.premio || noPrize) $("#claim-box").hidden = true;
-
     $("#cta-ig").href = L.instagram || "#";
     $("#cta-wa").href = L.wa_channel || "#";
     $("#cta-beacons").href = L.beacons || "#";
@@ -176,7 +172,7 @@
     $("#view-done").hidden = false;
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    startRedirect(L.instagram || L.beacons);
+    startRedirect(L.wa_channel || L.beacons);
   }
 
   function firstName(full) { return (full || "").split(" ")[0]; }

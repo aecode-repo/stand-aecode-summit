@@ -3,7 +3,7 @@
   PLANTILLA del correo (referencia). Muestra qué partes son dinámicas ({{...}})
   y de dónde sale cada texto:
 
-  {{saludo}}, {{intro}}, {{firma}}, {{link_beacons}}, {{link_ig}}, {{link_wa}}
+  {{saludo}}, {{intro}}, {{firma}}, {{link_beacons}}, {{link_ig}}, {{link_wa}}, {{link_luma}}
         → se editan en la pestaña "Config_Correo" del Google Sheet.
   {{nombre}}, {{lista_intereses}}, {{premio}}, {{codigo}}
         → los rellena el Apps Script con lo que la persona puso en el form.
@@ -21,7 +21,7 @@
   <div style="background:#191C32;border-radius:16px;padding:26px;text-align:center">
     <h1 style="color:#fff;font-size:22px;margin:0">{{saludo}}</h1>
     <p style="color:#9193BB;margin:10px 0 0">
-      Hola <b style="color:#fff">{{nombre}}</b>, gracias por pasar por nuestro stand. 🤝
+      Hola <b style="color:#fff">{{nombre}}</b>, gracias por visitarnos en el CONEIC. 🤝
     </p>
   </div>
 
@@ -39,7 +39,11 @@
       🎁 <b>Tu premio:</b> {{premio}} &nbsp;·&nbsp; código <b>{{codigo}}</b> (válido 24 h).
     </p>
 
+    <!-- No te olvides que tenemos ponencias: botón directo al calendario Luma -->
+    <p style="margin-top:14px;color:#33364d">No te olvides que tenemos estas <b>ponencias</b> — regístrate para no perderte ninguna.</p>
+
     <div style="margin:22px 0;text-align:center">
+      <a href="{{link_luma}}" style="display:block;margin:8px auto;max-width:320px;background:#236BF9;color:#fff;text-decoration:none;font-weight:700;padding:13px 18px;border-radius:100px">🎤 Ver calendario de ponencias en Luma</a>
       <a href="{{link_beacons}}" style="display:block;margin:8px auto;max-width:320px;background:#7C28F8;color:#fff;text-decoration:none;font-weight:700;padding:13px 18px;border-radius:100px">🔗 Mira todo lo de AECODE</a>
       <a href="{{link_ig}}" style="display:block;margin:8px auto;max-width:320px;background:#E1306C;color:#fff;text-decoration:none;font-weight:700;padding:13px 18px;border-radius:100px">📸 Síguenos en Instagram</a>
       <a href="{{link_wa}}" style="display:block;margin:8px auto;max-width:320px;background:#25D366;color:#fff;text-decoration:none;font-weight:700;padding:13px 18px;border-radius:100px">💬 Escríbenos por WhatsApp</a>

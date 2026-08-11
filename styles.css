@@ -1,22 +1,22 @@
 /* =========================================================================
-   AECODE Stand · AI Construction Summit 2026  —  v2 (editorial / premium)
-   Inspirado en aecode.ai/training: negro profundo, wash morado, tipografía
-   ligera con acentos en negrita, eyebrows, checks morados.
-   Paleta: morado #7C28F8 · violeta #6D5BF7 · cyan #6DEFFD · verde WA #25D366
+   AECODE Stand · CONEIC  —  v3 (editorial / premium, modo claro)
+   Fondo claro, wash morado muy sutil, tipografía ligera con acentos en
+   negrita, eyebrows, checks morados.
+   Paleta: morado #7C28F8 · violeta #6D5BF7 · cyan/teal #0EA5B7 · verde WA #25D366
    ========================================================================= */
 
 :root{
   --purple:#7C28F8;
   --violet:#6D5BF7;
-  --cyan:#6DEFFD;
-  --ink:#0B0B14;         /* fondo casi negro */
-  --ink-2:#12121d;       /* superficies */
-  --card:#15151f;        /* tarjetas */
-  --line:rgba(255,255,255,.08);
-  --line-2:rgba(255,255,255,.14);
-  --white:#F5F6FB;
-  --muted:#9A9CB8;
-  --muted-2:#6E7091;
+  --cyan:#0EA5B7;
+  --ink:#F7F7FB;          /* fondo claro */
+  --ink-2:#F1EFFA;        /* superficies (inputs) */
+  --card:#FFFFFF;         /* tarjetas */
+  --line:rgba(20,22,45,.10);
+  --line-2:rgba(20,22,45,.16);
+  --white:#15162B;        /* texto principal (oscuro sobre fondo claro) */
+  --muted:#6C6E8C;
+  --muted-2:#8B8DA8;
   --wa:#25D366;
 
   --radius:20px;
@@ -36,12 +36,12 @@ body{
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
 
-/* ---------- Wash morado superior (sutil, como la referencia) ---------- */
+/* ---------- Wash morado superior (muy sutil sobre fondo claro) ---------- */
 body::before{
   content:"";position:fixed;inset:0 0 auto 0;height:70vh;z-index:-1;pointer-events:none;
   background:
-    radial-gradient(120% 80% at 50% -10%, rgba(124,40,248,.38), transparent 60%),
-    radial-gradient(90% 60% at 85% 5%, rgba(109,239,253,.12), transparent 55%);
+    radial-gradient(120% 80% at 50% -10%, rgba(124,40,248,.10), transparent 60%),
+    radial-gradient(90% 60% at 85% 5%, rgba(14,165,183,.08), transparent 55%);
 }
 
 /* ---------- Layout ---------- */
@@ -60,7 +60,13 @@ body::before{
 
 /* ---------- Hero ---------- */
 .hero{text-align:center;padding:2px 4px 20px}
-.hero__logos .logo-summit{height:40px;width:auto;margin:0 auto 22px;object-fit:contain;opacity:.95}
+.hero__event{margin:0 0 14px}
+.event-badge{
+  display:inline-block;font-weight:800;letter-spacing:.01em;
+  font-size:clamp(2rem,9vw,2.8rem);line-height:1;
+  background:linear-gradient(100deg,var(--purple),var(--violet) 50%,var(--cyan));
+  -webkit-background-clip:text;background-clip:text;color:transparent
+}
 .hero__aecodito img{
   width:120px;height:120px;margin:0 auto 20px;border-radius:28px;object-fit:cover;
   border:1px solid var(--line-2);
@@ -103,7 +109,7 @@ body::before{
 .card{
   background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
   padding:24px 20px;margin-top:24px;
-  box-shadow:0 24px 60px -30px rgba(0,0,0,.8);
+  box-shadow:0 24px 50px -28px rgba(20,22,45,.20);
 }
 
 /* ---------- Form ---------- */
@@ -188,12 +194,12 @@ select option{color:#111;background:#fff}
 .btn--primary:active{transform:scale(.985)}
 .btn--ig{color:#fff;background:linear-gradient(120deg,#833AB4,#E1306C 55%,#F77737)}
 .btn--wa{background:var(--wa);color:#08351d}
-.btn--ghost{background:transparent;border:1.5px solid var(--line-2);color:#fff}
+.btn--ghost{background:transparent;border:1.5px solid var(--line-2);color:var(--white)}
 .btn:disabled{opacity:.6;cursor:not-allowed}
 .btn--loading .btn__label{opacity:.5}
 
 .form__error{
-  color:#ffc0cf;background:rgba(225,48,108,.13);border:1px solid rgba(225,48,108,.42);
+  color:#B0264B;background:rgba(225,48,108,.09);border:1px solid rgba(225,48,108,.35);
   border-radius:var(--radius-sm);padding:11px 14px;font-size:.9rem;margin-bottom:14px;font-weight:500
 }
 .form__legal{margin-top:14px;text-align:center;font-size:.75rem;color:var(--muted-2)}
@@ -227,7 +233,7 @@ select option{color:#111;background:#fff}
 .foot{max-width:var(--maxw);margin:12px auto 0;padding:22px 20px 36px;
   display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;
   color:var(--muted-2);font-size:.8rem}
-.foot__logo{height:20px;width:auto;opacity:.75}
+.foot__logo{height:20px;width:auto;opacity:.75;filter:invert(1)}
 
 @media (min-width:560px){
   .wrap{padding-top:40px}
