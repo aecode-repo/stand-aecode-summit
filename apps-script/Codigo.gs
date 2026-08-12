@@ -369,8 +369,10 @@ function sendLeadEmail_(data) {
   var diplomas = intereses.filter(function (i) { return diplomaSet[i]; });
   var otros    = intereses.filter(function (i) { return !diplomaSet[i]; });
 
-  var asunto = (cfg.asunto || "Gracias por visitarnos en el CONEIC")
-                 .replace("{nombre}", nombre);
+  // Fijo en código (no en el Sheet): la celda "asunto" de Config_Correo quedó
+  // con el texto viejo del AI Summit y nadie la sincroniza — mejor no depender
+  // de ella para esto puntual del CONEIC.
+  var asunto = "Gracias por visitarnos en el CONEIC";
   var descuento = cfg.descuento || "un descuento especial";
 
   var listaIntereses = intereses.length
@@ -407,12 +409,15 @@ function sendLeadEmail_(data) {
   // El botón de WhatsApp cambia según haya premio.
   var waLabel = (esPremioReal || diplomas.length) ? "Reclama tu premio aquí" : "Escríbenos por WhatsApp";
 
-  // Bloque de ponencias (calendario Luma) — solo si hay link configurado.
-  var bloquePonencias = cfg.link_luma ? (
+  // Bloque del taller CONEIC (evento Luma puntual — fijo en código, no en el
+  // Sheet, porque es un dato de una sola fecha, no algo que valga la pena
+  // sincronizar en Config_Correo).
+  var LINK_LUMA_TALLER = "https://luma.com/e2trbkxq";
+  var bloquePonencias =
     "<div style='margin:20px 0;padding:16px 18px;border-radius:12px;background:#EAF3FF;border:1px solid #CBE1FF'>" +
-      "<p style='margin:0;color:#33364d'>No te olvides que tenemos estas <b>ponencias</b> — regístrate para no perderte ninguna.</p>" +
-    "</div>"
-  ) : "";
+      "<p style='margin:0;color:#33364d'>No te olvides de nuestro taller presencial <b>BIM, automatización y agentes de IA para Ingeniería Civil</b> — viernes 14 de agosto, 10:15 a.m., Auditorio Paraninfo (UAC Cusco).</p>" +
+      "<p style='margin:8px 0 0;color:#33364d'>Sorteamos un dron, un smartwatch y becas de formación entre los asistentes.</p>" +
+    "</div>";
 
   var body = [
     "<div style='font-family:Manrope,Arial,sans-serif;max-width:520px;margin:auto;color:#1a1a2e'>",
@@ -429,7 +434,7 @@ function sendLeadEmail_(data) {
       bloqueOtros,
       bloquePonencias,
       "<div style='margin:24px 0;text-align:center'>",
-        btn_(cfg.link_luma, "Ver calendario de ponencias en Luma", "#236BF9"),
+        btn_(LINK_LUMA_TALLER, "Regístrate al taller en Luma", "#236BF9"),
         btn_(cfg.link_beacons, "Mira todo lo de AECODE", "#7C28F8"),
         btn_(cfg.link_ig, "Síguenos en Instagram", "#E1306C"),
         btn_(cfg.link_wa, waLabel, "#25D366"),
@@ -532,7 +537,6 @@ function setupSheet() {
     ["link_beacons", "https://beacons.ai/aecode.ai"],
     ["link_ig", "https://www.instagram.com/aecode.ai/"],
     ["link_wa", "https://aecode-wsp-main.vercel.app/becatalent"],
-    ["link_luma", "https://luma.com/aecode.ai"],
     ["firma", "Nos vemos pronto — Equipo AECODE"]
   ]);
 
