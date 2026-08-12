@@ -82,7 +82,7 @@ body::before{
   background:linear-gradient(100deg,var(--purple),var(--violet) 50%,var(--cyan));
   -webkit-background-clip:text;background-clip:text;color:transparent
 }
-.hero__lead{margin-top:16px;font-size:1.05rem;font-weight:400;color:#DBDCEC;text-wrap:balance}
+.hero__lead{margin-top:16px;font-size:1.05rem;font-weight:400;color:#3B3D5C;text-wrap:balance}
 .hero__lead b{font-weight:700;color:var(--white)}
 .hero__sub{margin-top:10px;font-size:.94rem;color:var(--muted);text-wrap:pretty}
 
@@ -95,7 +95,7 @@ body::before{
 }
 .steps li{
   flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
-  padding:11px 6px;font-size:.82rem;font-weight:600;color:#D4D5E6;
+  padding:11px 6px;font-size:.82rem;font-weight:600;color:var(--white);
   border-right:1px solid var(--line)
 }
 .steps li:last-child{border-right:0}
@@ -118,7 +118,7 @@ body::before{
 .field{display:block;margin-bottom:18px}
 .field--group{border:0}
 .field__label{
-  display:block;font-weight:700;font-size:.86rem;margin-bottom:8px;color:#E9EAF6;
+  display:block;font-weight:700;font-size:.86rem;margin-bottom:8px;color:var(--white);
   letter-spacing:-.01em
 }
 .field__label .opt-tag{font-weight:500;color:var(--muted);font-size:.8rem}

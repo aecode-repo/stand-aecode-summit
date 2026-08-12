@@ -1,13 +1,15 @@
 /**
  * AECODE Stand · CONEIC — Backend (Google Apps Script)
  * -------------------------------------------------------------------------
- * Flujo NUEVO (v4 — panel de vendedores):
- *   1) La persona se registra en la landing (doPost) -> se guarda en "Leads"
- *      con Estado = PENDIENTE.  NO se le envía correo todavía.
+ * Flujo v5 (CONEIC — el correo YA NO depende del vendedor):
+ *   1) La persona se registra en la landing (doPost) -> se guarda en TAB_LEADS
+ *      ("CONEIC") con Estado = PENDIENTE y se le envía DE INMEDIATO el correo
+ *      de bienvenida (ponencias/Luma, diplomados, etc. — sin premio todavía).
+ *      Así llega el correo aunque ningún vendedor la atienda nunca.
  *   2) Los vendedores entran al PANEL (panel/) con una contraseña y ven, en
  *      tiempo real, todos los registros PENDIENTES.
  *   3) El vendedor marca el premio que la persona ganó en la ruleta física.
- *   4) Recién ahí se envía el correo (ya con el premio) y el lead queda
+ *   4) Ahí se envía un SEGUNDO correo (ya con el premio) y el lead queda
  *      cerrado.  Un solo vendedor puede asignar cada registro (bloqueo).
  *
  * CÓMO INSTALAR / ACTUALIZAR:
@@ -35,7 +37,7 @@ var PANEL_KEY = "";
 // está atendiendo (para que otro no lo toque). Se libera solo al vencer.
 var LOCK_TTL_SECONDS = 90;
 
-var TAB_LEADS    = "Leads";
+var TAB_LEADS    = "CONEIC";   // tab propio del CONEIC — separado de "Leads" (histórico AI Summit)
 var TAB_CONFIG   = "Config_Correo";
 var TAB_RULETA   = "Inventario_Ruleta";
 var TAB_OPCIONES = "Opciones_Form";   // diplomados/intereses editables por ventas
@@ -45,7 +47,7 @@ var PREMIOS_HEADERS  = ["Orden", "Premio", "Tipo", "Activo"]; // Tipo: premio | 
 var TAB_SUSCRIP  = "Suscripciones";   // leads de la landing HUB (aecode-hub)
 var SUSCRIP_HEADERS = ["Timestamp", "Nombre", "Correo", "WhatsApp", "Perfil", "Intereses", "Fuente"];
 
-// Columnas de "Leads" (v4). Los índices se derivan de aquí (ver COL abajo).
+// Columnas de la pestaña de leads (TAB_LEADS). Los índices se derivan de aquí (ver COL abajo).
 var LEAD_HEADERS = [
   "Timestamp","Nombre","WhatsApp","Correo","Cargo/condición","Interés",
   "ID","Código","Estado","Premio asignado","Vendedor","Asignado en",
@@ -56,7 +58,7 @@ var COL = {};
 LEAD_HEADERS.forEach(function (h, i) { COL[h] = i + 1; });
 
 /* =========================================================================
-   doPost — recibe el formulario de la landing (NO envía correo aún)
+   doPost — recibe el formulario de la landing (envía el correo DE INMEDIATO)
    ========================================================================= */
 function doPost(e) {
   var lock = LockService.getScriptLock();
@@ -76,16 +78,27 @@ function doPost(e) {
       new Date(), data.nombre || "", data.whatsapp || "", data.correo || "",
       data.cargo || "", intereses,
       id, data.codigo || "", "PENDIENTE", "", "", "",
-      "No", data.fuente || "leads coneic presencial", data.user_agent || "", "", ""
+      "", data.fuente || "leads coneic presencial", data.user_agent || "", "", ""
     ];
     sheet.appendRow(row);
 
+    // Correo de bienvenida INMEDIATO — no depende de que un vendedor la
+    // atienda en el panel. Va sin bloque de premio (premio: "" = se oculta).
+    var sentNow = false;
+    try {
+      sendLeadEmail_({
+        nombre: data.nombre || "", correo: data.correo || "", cargo: data.cargo || "",
+        intereses: data.intereses || [], codigo: data.codigo || "", premio: ""
+      });
+      sentNow = true;
+    } catch (err) { Logger.log("Email error (doPost): " + err); }
+    sheet.getRange(sheet.getLastRow(), COL["Correo enviado"]).setValue(sentNow ? "Sí" : "Error");
+
     // El lead se captura en GHL de una vez (no perdemos el contacto).
-    // El CORREO se envía recién cuando el vendedor asigna el premio.
     try { if (GHL_TOKEN || GHL_WEBHOOK_URL) pushToGHL_(data); } catch (err) { Logger.log("GHL error: " + err); }
     try { if (NOTIFY_TEAM_EMAIL) notifyTeam_(data); } catch (err) {}
 
-    return json_({ ok: true, id: id, codigo: data.codigo });
+    return json_({ ok: true, id: id, codigo: data.codigo, correo: sentNow });
   } catch (err) {
     return json_({ ok: false, error: String(err) });
   } finally {

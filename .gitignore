@@ -6,3 +6,6 @@ node_modules/
 # Archivo local con el token GHL (NO subir)
 apps-script/Codigo.WITH-SECRETS.gs
 tokens.txt
+
+.vercel
+.env*
